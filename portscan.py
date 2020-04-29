@@ -108,14 +108,14 @@ def Scan(scan_ip,ports):
         final_port[scan_ip] = service
 
 #启用多线程扫描
-def main(target,level,ports):
+def main(target,level,ports,nums):
     queue = Queue()
     try:
         ip_list=get_ip_list(target)
         for final_ip in ip_list:
             queue.put(final_ip)
         threads = []
-        thread_count = 5
+        thread_count = nums
         for i in range(thread_count):
             threads.append(PortScan(queue,level,ports))
 
@@ -174,12 +174,13 @@ if __name__ =='__main__':
     parser = argparse.ArgumentParser(usage='python3 dirscan.py --target [source urls file]')
     parser.add_argument("-t","--target", type=str, help="192.168.1.0/24 or ip or ips or file.")
     parser.add_argument("-p","--ports", type=str, default="1-65535")
+    parser.add_argument("-n","--nums", type=int, default=5)
     parser.add_argument("-v","--level", type=int, help="-v  skip nmap",default="1")
     args = parser.parse_args()
     urls_file = args.target
     ports=args.ports
     level=args.level
 
-    main(urls_file,level,ports)
+    main(urls_file,level,ports,nums)
     spend_time = (datetime.datetime.now() - start_time).seconds
     print('程序共运行了： ' + str(spend_time) + '秒')
