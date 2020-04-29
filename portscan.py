@@ -180,6 +180,7 @@ if __name__ =='__main__':
     urls_file = args.target
     ports=args.ports
     level=args.level
+    nums=args.nums
 
     main(urls_file,level,ports,nums)
     spend_time = (datetime.datetime.now() - start_time).seconds
