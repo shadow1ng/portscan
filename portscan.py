@@ -294,7 +294,7 @@ def main(target,level,ports,nums):
 
 if __name__ =='__main__':
     start_time = datetime.datetime.now()
-    parser = argparse.ArgumentParser(usage='python3 dirscan.py --target [source urls file]')
+    parser = argparse.ArgumentParser(usage='python3 portscan.py --target [source urls file]')
     parser.add_argument("-t","--target", type=str, help="192.168.1.0/24 or ip or ips or file.")
     parser.add_argument("-p","--ports", type=str, default="1-65535")
     parser.add_argument("-n","--nums", type=int, default=10)
