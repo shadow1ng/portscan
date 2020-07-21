@@ -139,12 +139,10 @@ class HttpScan(threading.Thread):
                 req  = requests.get(url, headers=headers,proxies=proxy, timeout=timeout,verify=False)
                 status = req.status_code
             
-            code = re.search(r'<meta.*charset="?([\w|-]*)"?\s*/?>', req.text,re.IGNORECASE)
-            if code:
-                code = code.group(1)
+            if req.apparent_encoding:
+                req.encoding = req.apparent_encoding
             else:
-                code = "utf-8"
-            req.encoding=code
+                req.encoding = "utf-8"
             
             title = re.search(r'<title>(.*)</title>', req.text,re.S)
             if title:
