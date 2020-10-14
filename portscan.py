@@ -22,12 +22,12 @@ LOGFILE="result.txt"
 
 
 class PortScan(threading.Thread):
-    def __init__(self, queue,level,ports):
+    def __init__(self, queue,level,ports,nmap):
         threading.Thread.__init__(self)
         self._queue = queue
         self.level=level
         self.ports=ports
-
+        self.nmap = nmap
     def run(self):
         while not self._queue.empty():
             scan_ip = self._queue.get()
@@ -46,11 +46,14 @@ class PortScan(threading.Thread):
             try:
                 openports = self.MassScan(scan_ip,self.ports)
                 log("port",scan_ip,openports)
-                if len(openports)>0:
-                    service = self.NmapScan(scan_ip, openports)
-                    if domain:
+                if domain:
+                    log("port",domain,openports)
+                    if len(openports)>0 and self.nmap:
+                        service = self.NmapScan(scan_ip, openports)
                         log("domain",scan_ip,service,domain=domain)
-                    else:
+                else:
+                    if len(openports)>0 and self.nmap:
+                        service = self.NmapScan(scan_ip, openports)
                         log("service",scan_ip,service)
 
             except Exception as e:
@@ -223,24 +226,25 @@ def get_ip_list(ipin):
 
 def log(log_type,scan_ip,info,domain=None):
     lock.acquire()
+    f = open(LOGFILE, 'a+', encoding='utf-8')
     if log_type == "port":
         for port in info:
             output = "{}:{} open".format(scan_ip,port)
             webqueue.put(":".join([scan_ip,port]))
             print(output)
+            f.write(str(output)+"\n")
     elif log_type == "service":
         for port in info:
             output = '{}:{} is {}'.format(scan_ip,port,info[port])
             print(output)
-            f = open(LOGFILE, 'a+', encoding='utf-8')
             f.write(str(output)+"\n")
     elif log_type == "domain":
         for port in info:
             output = '{}:{} {} is {}'.format(scan_ip,port,domain,info[port])
             webqueue.put(":".join([domain,str(port)]))
             print(output)
-            f = open(LOGFILE, 'a+', encoding='utf-8')
             f.write(str(output)+"\n")
+    f.close()
     lock.release()
 
 
@@ -248,7 +252,7 @@ def log(log_type,scan_ip,info,domain=None):
 
 
 
-def run_port(target,level,ports,nums):
+def run_port(target,level,ports,nums,nmap):
     queue = Queue()
     threads = []
     try:
@@ -257,7 +261,7 @@ def run_port(target,level,ports,nums):
             queue.put(ip)
 
         for i in range(nums):
-            threads.append(PortScan(queue,level,ports))
+            threads.append(PortScan(queue,level,ports,nmap))
 
         for t in threads:
             t.start()
@@ -283,9 +287,9 @@ def run_http(webqueue,threadNum =100):
         t.join()
 
 #启用多线程扫描
-def main(target,level,ports,nums):
-    run_port(target,level,ports,nums)
-    if level>0:
+def main(target,level,ports,nums,web,nmap):
+    run_port(target,level,ports,nums,nmap)
+    if web:
         run_http(webqueue)
 
 
@@ -296,7 +300,7 @@ if __name__ =='__main__':
     parser.add_argument("-t","--target", type=str, help="192.168.1.0/24 or ip or ips or file.")
     parser.add_argument("-p","--ports", type=str, default="1-65535")
     parser.add_argument("-n","--nums", type=int, default=10)
-    parser.add_argument("-v","--level", type=int, help="-v 0 not run webtitle",default="1")
+    parser.add_argument("-v","--level", type=int, help="level 0 port  1 port+web  2 port+nmap  3 port+web+nmap",default="1")
     parser.add_argument("-o","--output", type=str, help="outfile",default="result.txt")
     args = parser.parse_args()
     target = args.target
@@ -304,6 +308,14 @@ if __name__ =='__main__':
     level=args.level
     nums=args.nums
     LOGFILE=args.output
-    main(target,level,ports,nums)
+    if level == 1:
+        web = 1
+    elif level == 2:
+        nmap = 1
+    elif level ==3:
+        web,nmap = 1,1
+    else:
+        web,nmap = 1,0
+    main(target,level,ports,nums,web,nmap)
     spend_time = (datetime.datetime.now() - start_time).seconds
     print('程序共运行了： ' + str(spend_time) + '秒')
