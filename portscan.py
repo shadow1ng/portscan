@@ -300,7 +300,7 @@ if __name__ =='__main__':
     parser.add_argument("-t","--target", type=str, help="192.168.1.0/24 or ip or ips or file.")
     parser.add_argument("-p","--ports", type=str, default="1-65535")
     parser.add_argument("-n","--nums", type=int, default=10)
-    parser.add_argument("-v","--level", type=int, help="level 0 port  1 port+web  2 port+nmap  3 port+web+nmap",default="1")
+    parser.add_argument("-v","--level", type=int, help="level 0 only port  1 port+web  2 port+nmap  3 port+web+nmap (default=1)",default="1")
     parser.add_argument("-o","--output", type=str, help="outfile",default="result.txt")
     args = parser.parse_args()
     target = args.target
