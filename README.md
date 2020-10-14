@@ -21,7 +21,7 @@ python3 portscan.py -t target.txt -v 0
 3.chmod +x masscan 或者 apt install masscan 
 
 ## windows
-1.安装nmap,npcap
+1.安装nmap,npcap  
 2.pip3 install python-nmap  
 
 报错处理:  
