@@ -286,7 +286,7 @@ def run_http(webqueue,threadNum =100):
     for t in threads:
         t.join()
 
-#启用多线程扫描
+#port+web
 def main(target,level,ports,nums,web,nmap):
     run_port(target,level,ports,nums,nmap)
     if web:
@@ -308,14 +308,16 @@ if __name__ =='__main__':
     level=args.level
     nums=args.nums
     LOGFILE=args.output
+    if level == 0:
+        web,nmap = 0,0
     if level == 1:
-        web = 1
+        web,nmap = 1,0
     elif level == 2:
-        nmap = 1
+        web,nmap = 0,1
     elif level ==3:
         web,nmap = 1,1
     else:
         web,nmap = 1,0
     main(target,level,ports,nums,web,nmap)
     spend_time = (datetime.datetime.now() - start_time).seconds
-    print('程序共运行了： ' + str(spend_time) + '秒')
+    print('running time： ' + str(spend_time) + 's')
